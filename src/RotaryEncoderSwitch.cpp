@@ -1,4 +1,3 @@
-#pragma once
 #include "Arduino.h"
 #include "RotaryEncoderSwitch.h"
 
@@ -10,6 +9,11 @@ RotaryEnoderSwitch::RotaryEnoderSwitch(uint8_t pinA, uint8_t pinB, uint8_t pinSw
     this->pinSwitch = pinSwitch;
     this->type = type;
 
+    // enable input pins
+    pinMode(this->pinA,INPUT);
+    pinMode(this->pinB,INPUT);
+    pinMode(this->pinSwitch,INPUT);
+    
     int8_t newval = 0;
     if( digitalRead(this->pinA) )
         newval = 3;
@@ -26,7 +30,7 @@ void RotaryEnoderSwitch::tickDebounceDecode(void){
 
 int8_t RotaryEnoderSwitch::readEncoder(void)
 {
-    uint8_t ret = 0;
+    int8_t ret = 0;
     switch(type)
     {
         case EncoderType::singleStep:
@@ -54,7 +58,7 @@ void RotaryEnoderSwitch::rotarydecode(void)
   new_val = 0;
   if( digitalRead(this->pinA) )
     new_val = 3;
-  if( digitalRead(this->pinA) )
+  if( digitalRead(this->pinB) )
     new_val ^= 1;                   // convert gray to binary
   diff = last_val - new_val;                // difference last - new
   if( diff & 1 ){               // bit 0 = value (1)

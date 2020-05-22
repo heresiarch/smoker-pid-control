@@ -1,7 +1,6 @@
 #pragma once
 #include <inttypes.h>
 
-class RotaryEnoderSwitch{
 
 enum EncoderType{
     singleStep = 1,
@@ -9,6 +8,7 @@ enum EncoderType{
     fourStep = 4
 };
 
+class RotaryEnoderSwitch{
 
 public:
     public:
@@ -18,6 +18,9 @@ public:
         void tickDebounceDecode(void); 
         int8_t readEncoder(void);   
     private:
+        // https://www.mikrocontroller.net/topic/436244
+        // https://tech.alpsalpine.com/prod/e/html/encoder/incremental/ec12e/ec12e_list.html
+        // Enoder Type = EC12 = 15 pulse / 30 dentet * 4 = 2 step encoder    
         // read single step encoders
         int8_t encode_read1(void);
         // read two step encoders
@@ -31,7 +34,7 @@ public:
         void rotarydecode(void);
     private:
        volatile int8_t enc_delta;          // -128 ... 127
-       static int8_t last_val;
+       int8_t last_val;
        uint8_t pinA;
        uint8_t pinB; 
        uint8_t pinSwitch;

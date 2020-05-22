@@ -4,13 +4,14 @@
 #include <TimerFour.h>
 
 #include "PlatinumSensor.h"
+#include "RotaryEncoderSwitch.h"
 
 int pwmPin = 3;
 int8_t loopi=0;
 
 LiquidCrystal lcd(7,8,9,10,11,12);
-
 Adafruit_MAX31865 max = Adafruit_MAX31865(2,4,5,6);
+RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,A2,EncoderType::twoStep);
 
 const int led = LED_BUILTIN;  // the pin with a LED
 // The interrupt will blink the LED, and keep
@@ -27,6 +28,7 @@ void blinkLED(void)
     ledState = LOW;
   }
   digitalWrite(led, ledState);
+  rot.tickDebounceDecode();
 }
 
 
@@ -44,7 +46,7 @@ void setup() {
   max.begin(MAX31865_4WIRE);
 
   pinMode(led, OUTPUT);
-  Timer4.initialize(150000);
+  Timer4.initialize(1000);
   Timer4.attachInterrupt(blinkLED); // blinkLED to run every 0.15 seconds
 }
 
@@ -86,8 +88,22 @@ void loop() {
   delay(1000);
   lcd.clear();
   
-  /*
-  int start=0;
+  pinMode(A0,INPUT);
+  pinMode(A1,INPUT);
+  
+
+  while(true){
+    int8_t delta = rot.readEncoder();
+    if(delta < 0)
+      Serial.println("Right");
+    else if(delta > 0)
+        Serial.println("Left");
+    delay(50);
+    Serial.println(delta);
+  }
+
+
+  /*  
   while(true)
   {
     analogWrite(pwmPin,start);

@@ -1,7 +1,9 @@
 #include <Arduino.h>
+#include <Wire.h>
 #include <LiquidCrystal.h>
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
+#include <MyButton.h>
 
 #include "PlatinumSensor.h"
 #include "RotaryEncoderSwitch.h"
@@ -11,7 +13,8 @@ int8_t loopi=0;
 
 LiquidCrystal lcd(7,8,9,10,11,12);
 Adafruit_MAX31865 max = Adafruit_MAX31865(2,4,5,6);
-RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,A2,EncoderType::twoStep);
+RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,EncoderType::twoStep);
+MyButton mybutton = MyButton(A2,true,false);
 
 const int led = LED_BUILTIN;  // the pin with a LED
 // The interrupt will blink the LED, and keep
@@ -29,6 +32,7 @@ void blinkLED(void)
   }
   digitalWrite(led, ledState);
   rot.tickDebounceDecode();
+  mybutton.debounce();
 }
 
 
@@ -52,13 +56,9 @@ void setup() {
 
 void loop() {
   float rtd = (float)max.readRTD();
-  Serial.print("RTD value: "); Serial.println(rtd);
   float ratio = rtd;
   ratio /= 32768;
-  Serial.print("Ratio = "); Serial.println(ratio,8);
-  Serial.print("Resistance = "); Serial.println(4300.00*ratio,8);
-  Serial.print("Temp °C = "); Serial.println(PlatinumSensor::tempFromPtResistance(4300.00*ratio,1000.00));
-    // Check and print any faults
+  // Check and print any faults
   lcd.print("R="); lcd.print(4300.00*ratio);
   lcd.setCursor(0,1); 
   lcd.print("T="); lcd.print(PlatinumSensor::tempFromPtResistance(4300.00*ratio,1000.00));
@@ -85,24 +85,21 @@ void loop() {
     }
     max.clearFault();
   }
-  delay(1000);
-  lcd.clear();
-  
   pinMode(A0,INPUT);
   pinMode(A1,INPUT);
+  int8_t delta = rot.readEncoder();
+  if(delta < 0)
+    Serial.println("Right");
+  else if(delta > 0)
+      Serial.println("Left");
   
-
-  while(true){
-    int8_t delta = rot.readEncoder();
-    if(delta < 0)
-      Serial.println("Right");
-    else if(delta > 0)
-        Serial.println("Left");
-    delay(50);
-    Serial.println(delta);
+  if(mybutton.buttonPressed()){
+    Serial.println("Button");
   }
-
-
+  if(mybutton.longPressed()){
+      Serial.println("Long");  
+  }
+  delay(100);
   /*  
   while(true)
   {

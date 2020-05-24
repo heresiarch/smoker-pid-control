@@ -2,17 +2,14 @@
 #include "RotaryEncoderSwitch.h"
 
 
-RotaryEnoderSwitch::RotaryEnoderSwitch(uint8_t pinA, uint8_t pinB, uint8_t pinSwitch,EncoderType type)
+RotaryEnoderSwitch::RotaryEnoderSwitch(uint8_t pinA, uint8_t pinB,EncoderType type)
 {
     this->pinA = pinA;
     this->pinB = pinB;
-    this->pinSwitch = pinSwitch;
     this->type = type;
-
     // enable input pins
     pinMode(this->pinA,INPUT);
     pinMode(this->pinB,INPUT);
-    pinMode(this->pinSwitch,INPUT);
     
     int8_t newval = 0;
     if( digitalRead(this->pinA) )
@@ -24,8 +21,17 @@ RotaryEnoderSwitch::RotaryEnoderSwitch(uint8_t pinA, uint8_t pinB, uint8_t pinSw
 }
 
 void RotaryEnoderSwitch::tickDebounceDecode(void){
-    
-    this->rotarydecode();
+  int8_t new_val, diff;
+  new_val = 0;
+  if( digitalRead(this->pinA) )
+    new_val = 3;
+  if( digitalRead(this->pinB) )
+    new_val ^= 1;                   // convert gray to binary
+  diff = last_val - new_val;                // difference last - new
+  if( diff & 1 ){               // bit 0 = value (1)
+    last_val = new_val;                 // store new as next last
+    enc_delta += (diff & 2) - 1;        // bit 1 = direction (+/-)
+  }   
 }
 
 int8_t RotaryEnoderSwitch::readEncoder(void)
@@ -46,25 +52,6 @@ int8_t RotaryEnoderSwitch::readEncoder(void)
             break;         
     }
     return ret;
-}
-
-
-
-
-
-void RotaryEnoderSwitch::rotarydecode(void)
-{
-  int8_t new_val, diff;
-  new_val = 0;
-  if( digitalRead(this->pinA) )
-    new_val = 3;
-  if( digitalRead(this->pinB) )
-    new_val ^= 1;                   // convert gray to binary
-  diff = last_val - new_val;                // difference last - new
-  if( diff & 1 ){               // bit 0 = value (1)
-    last_val = new_val;                 // store new as next last
-    enc_delta += (diff & 2) - 1;        // bit 1 = direction (+/-)
-  }
 }
 
 int8_t RotaryEnoderSwitch::encode_read1( void )         // read single step encoders
@@ -89,7 +76,4 @@ int8_t RotaryEnoderSwitch::encode_read4( void )         // read four step encode
   val = enc_delta;
   enc_delta = val & 3;
   return val >> 2;
-}
-void RotaryEnoderSwitch::debounce_switch(void){
-
 }

@@ -33,6 +33,9 @@ void MyButton::debounce(void){
     if(long_counter == 1024)
     {
         long_state = 1;
+        //state = 0;
+        //cnt0 = 0;
+        //cnt1 = 0;
     }
     
 }

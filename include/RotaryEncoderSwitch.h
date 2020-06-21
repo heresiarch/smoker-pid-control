@@ -17,10 +17,6 @@ public:
         // call in your loop function
         void tickDebounceDecode(void); 
         int8_t readEncoder(void);
-        // if returns true it will clear the button up state
-        bool buttonUpEvent(void);
-        // if returns true it will clear the long press state
-        bool buttonLongPressEvent(void);
     private:
         // https://www.mikrocontroller.net/topic/436244
         // https://tech.alpsalpine.com/prod/e/html/encoder/incremental/ec12e/ec12e_list.html

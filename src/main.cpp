@@ -33,6 +33,10 @@ uint16_t startMillis;  //some global variables available anywhere in the program
 uint16_t currentMillis;
 uint16_t period = 1000;  //the value is a number of milliseconds
 
+uint16_t startMillisDisplay;  //some global variables available anywhere in the program
+uint16_t currentMillisDisplay;
+uint16_t periodDisplay = 5000;  //the value is a number of milliseconds
+bool switchDisplay = false;
 
 float currentTemp = 0.0;
 float targetTemp = 90.0;
@@ -44,7 +48,7 @@ uint16_t targetTimer = TIMER_MIN;
 
 uint8_t pwmValue = 0;
 #define MAX_PWM  255
-#define MIN_PWM  20
+#define MIN_PWM  0
 
 
                                                 //0123456789ABCDEF     
@@ -58,10 +62,10 @@ static const char MENU_ITEMS [3][17] PROGMEM =  {" Manual Mode    ",
                                                  " Fuzzy Control  ",
                                                  " Reset          "};
 
-static const char SET_MAN_LINE_00[] PROGMEM =    "Tact:         C";
-static const char SET_MAN_LINE_01[] PROGMEM =    "Ttar:         C";
-static const char SET_MAN_LINE_02[] PROGMEM =    "PWM value      ";
-static const char SET_MAN_LINE_03[] PROGMEM =    "               ";
+static const char SET_MAN_LINE_00[] PROGMEM =    "Tact:          C";
+static const char SET_MAN_LINE_01[] PROGMEM =    "Ttar:          C";
+static const char SET_MAN_LINE_02[] PROGMEM =    "PWM value       ";
+static const char SET_MAN_LINE_03[] PROGMEM =    "                ";
 
 
 uint8_t menuIdx = 0;
@@ -182,16 +186,22 @@ void menuMsg(){
 }
 
 void manualMsg(){
-    strncpy_P(line0, SET_MAN_LINE_00, 16);
-    strncpy_P(line1, SET_MAN_LINE_01, 16);
-    line0[14] = 0xDF;
-    line1[14] = 0xDF;
-    String value = "Tact: " + String(currentTemp,2);
-    strncpy(line0,value.c_str(),value.length());
-    value = "Ttar: " + String(targetTemp,2);
-    strncpy(line1,value.c_str(),value.length());
-    line0[15] = 'C';
-    line1[15] = 'C';  
+    if(!switchDisplay){
+      strncpy_P(line0, SET_MAN_LINE_00, 16);
+      strncpy_P(line1, SET_MAN_LINE_01, 16);
+      line0[14] = 0xDF;
+      line1[14] = 0xDF;
+      String value = "Tact: " + String(currentTemp,2);
+      strncpy(line0,value.c_str(),value.length());
+      value = "Ttar: " + String(targetTemp,2);
+      strncpy(line1,value.c_str(),value.length());
+    }
+    else{
+        strncpy_P(line0, SET_MAN_LINE_02, 16);
+        strncpy_P(line1, SET_MAN_LINE_03, 16);
+        String value = String(pwmValue,10);
+        strncpy(line1,value.c_str(),value.length());
+    }
 }
 
 void updateDisplay(void){
@@ -262,11 +272,20 @@ void loop(){
     case MANUAL:
       manualMsg();
       if (buttons  & (1<<LEFT_MOVE) && pwmValue < MAX_PWM){
-         pwmValue ++; 
+        pwmValue ++;
+        switchDisplay = true;
+        startMillisDisplay = currentMillis;
       }
       else if (buttons & (1<<RIGHT_MOVE) && pwmValue > MIN_PWM){
-         pwmValue --;
+        pwmValue --;
+        switchDisplay = true;
+        startMillisDisplay = currentMillis;
       }
+      currentMillisDisplay = millis();
+      if(switchDisplay && currentMillisDisplay - startMillisDisplay >= periodDisplay){
+        switchDisplay = false;  
+      }
+
       if (buttons  & (1<<BUTTON_LONG_PUSH)){
         opState = OFF;
       }

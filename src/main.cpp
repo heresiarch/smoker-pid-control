@@ -4,6 +4,7 @@
 #include <LiquidCrystal.h>
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
+#include <AutoPID.h>
 
 
 #include "MyButton.h"
@@ -21,7 +22,7 @@ Adafruit_MAX31865 max = Adafruit_MAX31865(2,4,5,6);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,EncoderType::twoStep);
 MyButton mybutton = MyButton(A2,true,false);
 
-enum operatingState { OFF = 0, SET_TEMP, SET_TIMER, MENU, MANUAL, FUZZY};
+enum operatingState { OFF = 0, SET_TEMP, SET_TIMER, MENU, MANUAL, PREP_PID, PID};
 operatingState opState = OFF;
 
 #define RIGHT_MOVE 0
@@ -38,8 +39,8 @@ uint16_t currentMillisDisplay;
 uint16_t periodDisplay = 5000;  //the value is a number of milliseconds
 bool switchDisplay = false;
 
-float currentTemp = 0.0;
-float targetTemp = 90.0;
+double currentTemp = 0.0;
+double targetTemp = 90.0;
 #define TARGET_TEMP_MAX 150.0
 #define TARGET_TEMP_MIN 90
 #define TIMER_MAX 840
@@ -50,6 +51,13 @@ uint8_t pwmValue = 0;
 #define MAX_PWM  255
 #define MIN_PWM  0
 
+#define KP .12
+#define KI .0003
+#define KD 0
+double outputVal;
+#define PID_BANG_BANG 5
+#define PID_TIME_STEP 4000
+AutoPID* myPID;
 
                                                 //0123456789ABCDEF     
 static const char OFF_LINE_00[] PROGMEM =       "BBQ is Off      ";
@@ -59,15 +67,13 @@ static const char SET_T_LINE_01[] PROGMEM =     "                ";
 static const char SET_TIMER_LINE_00[] PROGMEM = "Set Timer       ";
 static const char SET_TIMER_LINE_01[] PROGMEM = "    min         ";
 static const char MENU_ITEMS [3][17] PROGMEM =  {" Manual Mode    ", 
-                                                 " Fuzzy Control  ",
+                                                 " PID Control    ",
                                                  " Reset          "};
 
 static const char SET_MAN_LINE_00[] PROGMEM =    "Tact:          C";
 static const char SET_MAN_LINE_01[] PROGMEM =    "Ttar:          C";
 static const char SET_MAN_LINE_02[] PROGMEM =    "PWM value       ";
 static const char SET_MAN_LINE_03[] PROGMEM =    "                ";
-
-
 uint8_t menuIdx = 0;
 
 void timer4(void)
@@ -204,6 +210,7 @@ void manualMsg(){
     }
 }
 
+
 void updateDisplay(void){
   lcd.setCursor(0, 0);
   lcd.print(line0);
@@ -263,7 +270,7 @@ void loop(){
         if(menuIdx == 0)
           opState = MANUAL;
         else if (menuIdx == 1)
-          opState = FUZZY;
+          opState = PREP_PID;
         else
           opState = OFF;
       }
@@ -291,18 +298,31 @@ void loop(){
       }
       break;
     
-    case FUZZY:
+    case PREP_PID:
+      myPID = new AutoPID(&currentTemp, &targetTemp, &outputVal, MIN_PWM, MAX_PWM, KP, KI, KD);
+      myPID->setBangBang(PID_BANG_BANG);
+      myPID->setTimeStep(PID_TIME_STEP);
+      opState = PID;
+      break;    
+    
+    case PID:
+      manualMsg();
+      myPID->run();
+      pwmValue = outputVal;
       if (buttons  & (1<<BUTTON_LONG_PUSH)){
+        myPID->stop();
+        delete myPID;  
         opState = OFF;
       }
-      break;    
-
+      break;
     default:
       opState = OFF;
       break;
   }
   updateDisplay();
   Serial.println(pwmValue);
+  Serial.println(currentTemp);
+  
   analogWrite(pwmPin,pwmValue);
 }
 

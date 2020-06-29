@@ -4,7 +4,7 @@
 #include <LiquidCrystal.h>
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
-#include <AutoPID.h>
+#include <PID_v1.h>
 
 
 #include "MyButton.h"
@@ -22,7 +22,7 @@ Adafruit_MAX31865 max = Adafruit_MAX31865(2,4,5,6);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,EncoderType::twoStep);
 MyButton mybutton = MyButton(A2,true,false);
 
-enum operatingState { OFF = 0, SET_TEMP, SET_TIMER, MENU, MANUAL, PREP_PID, PID};
+enum operatingState { OFF = 0, SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_PID, RUN_PID};
 operatingState opState = OFF;
 
 #define RIGHT_MOVE 0
@@ -51,13 +51,12 @@ uint8_t pwmValue = 0;
 #define MAX_PWM  255
 #define MIN_PWM  0
 
-#define KP .12
-#define KI .0003
-#define KD 0
 double outputVal;
-#define PID_BANG_BANG 5
-#define PID_TIME_STEP 4000
-AutoPID* myPID;
+PID* myPID;
+
+double aggKp=4, aggKi=0.2, aggKd=1;
+double consKp=1, consKi=0.05, consKd=0.25;
+double gap = 0.0;
 
                                                 //0123456789ABCDEF     
 static const char OFF_LINE_00[] PROGMEM =       "BBQ is Off      ";
@@ -268,7 +267,7 @@ void loop(){
       }
       if (buttons & (1 << BUTTON_PUSH)){
         if(menuIdx == 0)
-          opState = MANUAL;
+          opState = MANUAL_MODE;
         else if (menuIdx == 1)
           opState = PREP_PID;
         else
@@ -276,7 +275,7 @@ void loop(){
       }
       break;
 
-    case MANUAL:
+    case MANUAL_MODE:
       manualMsg();
       if (buttons  & (1<<LEFT_MOVE) && pwmValue < MAX_PWM){
         pwmValue ++;
@@ -299,18 +298,30 @@ void loop(){
       break;
     
     case PREP_PID:
-      myPID = new AutoPID(&currentTemp, &targetTemp, &outputVal, MIN_PWM, MAX_PWM, KP, KI, KD);
-      myPID->setBangBang(PID_BANG_BANG);
-      myPID->setTimeStep(PID_TIME_STEP);
-      opState = PID;
+      //myPID = new PID(&currentTemp, &outputVal, &targetTemp, KP, KI, KD, DIRECT);
+      myPID = new PID (&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
+      myPID->SetMode(AUTOMATIC);
+      opState = RUN_PID;
       break;    
     
-    case PID:
+    case RUN_PID:
       manualMsg();
-      myPID->run();
+      gap = abs(targetTemp-currentTemp); //distance away from setpoint
+      if (gap < 10)
+        myPID->SetTunings(consKp, consKi, consKd);
+      else
+        myPID->SetTunings(aggKp, aggKi, aggKd);
+      myPID->Compute();
       pwmValue = outputVal;
+      if (buttons  & (1<<LEFT_MOVE) || buttons & (1<<RIGHT_MOVE) ){
+        switchDisplay = true;
+        startMillisDisplay = currentMillis;
+      }
+      currentMillisDisplay = millis();
+      if(switchDisplay && currentMillisDisplay - startMillisDisplay >= periodDisplay){
+        switchDisplay = false;  
+      }
       if (buttons  & (1<<BUTTON_LONG_PUSH)){
-        myPID->stop();
         delete myPID;  
         opState = OFF;
       }

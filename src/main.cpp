@@ -42,7 +42,7 @@ bool switchDisplay = false;
 double currentTemp = 0.0;
 double targetTemp = 60.0;
 #define TARGET_TEMP_MAX 180.0
-#define TARGET_TEMP_MIN 60.0
+#define TARGET_TEMP_MIN 20.0
 #define TIMER_MAX 840
 #define TIMER_MIN 5
 uint16_t targetTimer = TIMER_MIN;
@@ -52,10 +52,11 @@ uint8_t pwmValue = 0;
 #define MIN_PWM  30
 
 double outputVal;
-PID* myPID;
-
 double aggKp=4, aggKi=0.2, aggKd=1;
-double consKp=1, consKi=0.05, consKd=0.25;
+//double consKp=1, consKi=0.05, consKd=0.25;
+double consKp=2, consKi=0.1, consKd=0.5;
+PID myPID(&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
+
 
 
                                                 //0123456789ABCDEF     
@@ -216,16 +217,16 @@ void doControll(void){
     pwmValue = 0;
   }
   else if(gap > 0 && gap<=10) {  //we're close to setpoint, use conservative tuning parameters
-    myPID->SetTunings(consKp, consKi, consKd);
-    myPID->Compute();
+    myPID.SetTunings(consKp, consKi, consKd);
+    myPID.Compute();
     pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
     if(pwmValue > MAX_PWM){
       pwmValue = MAX_PWM;
     }
   }
   else {//we're far from setpoint, use aggressive tuning parameters
-    myPID->SetTunings(aggKp, aggKi, aggKd);
-    myPID->Compute();
+    myPID.SetTunings(aggKp, aggKi, aggKd);
+    myPID.Compute();
     pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
     if(pwmValue > MAX_PWM){
       pwmValue = MAX_PWM;
@@ -321,8 +322,9 @@ void loop(){
       break;
     
     case PREP_PID:
-      myPID = new PID (&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
-      myPID->SetMode(AUTOMATIC);
+      myPID.SetMode(MANUAL);
+      outputVal = 0.0;
+      myPID.SetMode(AUTOMATIC);
       opState = RUN_PID;
       break;    
     
@@ -337,8 +339,7 @@ void loop(){
       if(switchDisplay && currentMillisDisplay - startMillisDisplay >= periodDisplay){
         switchDisplay = false;  
       }
-      if (buttons  & (1<<BUTTON_LONG_PUSH)){
-        delete myPID;  
+      if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
         opState = OFF;
       }
       break;

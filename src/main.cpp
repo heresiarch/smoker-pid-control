@@ -40,23 +40,23 @@ uint16_t periodDisplay = 5000;  //the value is a number of milliseconds
 bool switchDisplay = false;
 
 double currentTemp = 0.0;
-double targetTemp = 90.0;
-#define TARGET_TEMP_MAX 150.0
-#define TARGET_TEMP_MIN 90
+double targetTemp = 60.0;
+#define TARGET_TEMP_MAX 180.0
+#define TARGET_TEMP_MIN 60.0
 #define TIMER_MAX 840
 #define TIMER_MIN 5
 uint16_t targetTimer = TIMER_MIN;
 
 uint8_t pwmValue = 0;
 #define MAX_PWM  255
-#define MIN_PWM  0
+#define MIN_PWM  30
 
 double outputVal;
 PID* myPID;
 
 double aggKp=4, aggKi=0.2, aggKd=1;
 double consKp=1, consKi=0.05, consKd=0.25;
-double gap = 0.0;
+
 
                                                 //0123456789ABCDEF     
 static const char OFF_LINE_00[] PROGMEM =       "BBQ is Off      ";
@@ -209,6 +209,29 @@ void manualMsg(){
     }
 }
 
+void doControll(void){
+
+  double gap = targetTemp - currentTemp;
+  if(gap <= 0){     
+    pwmValue = 0;
+  }
+  else if(gap > 0 && gap<=10) {  //we're close to setpoint, use conservative tuning parameters
+    myPID->SetTunings(consKp, consKi, consKd);
+    myPID->Compute();
+    pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
+    if(pwmValue > MAX_PWM){
+      pwmValue = MAX_PWM;
+    }
+  }
+  else {//we're far from setpoint, use aggressive tuning parameters
+    myPID->SetTunings(aggKp, aggKi, aggKd);
+    myPID->Compute();
+    pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
+    if(pwmValue > MAX_PWM){
+      pwmValue = MAX_PWM;
+    }
+  }
+}
 
 void updateDisplay(void){
   lcd.setCursor(0, 0);
@@ -298,7 +321,6 @@ void loop(){
       break;
     
     case PREP_PID:
-      //myPID = new PID(&currentTemp, &outputVal, &targetTemp, KP, KI, KD, DIRECT);
       myPID = new PID (&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
       myPID->SetMode(AUTOMATIC);
       opState = RUN_PID;
@@ -306,13 +328,7 @@ void loop(){
     
     case RUN_PID:
       manualMsg();
-      gap = abs(targetTemp-currentTemp); //distance away from setpoint
-      if (gap < 10)
-        myPID->SetTunings(consKp, consKi, consKd);
-      else
-        myPID->SetTunings(aggKp, aggKi, aggKd);
-      myPID->Compute();
-      pwmValue = outputVal;
+      doControll();
       if (buttons  & (1<<LEFT_MOVE) || buttons & (1<<RIGHT_MOVE) ){
         switchDisplay = true;
         startMillisDisplay = currentMillis;

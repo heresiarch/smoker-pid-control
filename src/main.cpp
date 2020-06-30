@@ -53,8 +53,8 @@ uint8_t pwmValue = 0;
 
 double outputVal;
 double aggKp=4, aggKi=0.2, aggKd=1;
-//double consKp=1, consKi=0.05, consKd=0.25;
-double consKp=2, consKi=0.1, consKd=0.5;
+double consKp=1, consKi=0.05, consKd=0.25;
+//double consKp=2, consKi=0.1, consKd=0.5;
 PID myPID(&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
 
 
@@ -213,7 +213,7 @@ void manualMsg(){
 void doControll(void){
 
   double gap = targetTemp - currentTemp;
-  if(gap <= 0){     
+  if(gap <= -1.0){     
     pwmValue = 0;
   }
   else if(gap > 0 && gap<=10) {  //we're close to setpoint, use conservative tuning parameters

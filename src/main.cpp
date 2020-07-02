@@ -23,7 +23,7 @@ Adafruit_MAX31865 max = Adafruit_MAX31865(2,4,5,6);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,EncoderType::twoStep);
 MyButton mybutton = MyButton(A2,true,false);
 
-enum operatingState { OFF = 0, SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_AUTOTUNE, RUN_AUTOTUNE, PREP_PID, RUN_PID};
+enum operatingState { INIT = 0, OFF,SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_AUTOTUNE, RUN_AUTOTUNE, PREP_PID, RUN_PID};
 operatingState opState = OFF;
 
 #define RIGHT_MOVE 0
@@ -111,7 +111,7 @@ void setup() {
   Telemetry.attach_f32_to("p", &p);
   Telemetry.attach_f32_to("i", &i);
   Telemetry.attach_f32_to("d", &d);
- 
+  opState = INIT;
 }
 
 float readTemperature(void){
@@ -190,7 +190,7 @@ void timerMsg(void){
   strncpy(line1,value.c_str(),value.length());
 }
 
-void menuMsg(){
+void menuMsg(){ //TODO rework scrolling too many ifs
     if(menuIdx == 0){
       strncpy_P(line0, MENU_ITEMS[0], 16);
       strncpy_P(line1, MENU_ITEMS[1], 16);
@@ -314,6 +314,11 @@ void loop(){
   uint8_t buttons = readButtons();
   switch (opState)
   {
+    case INIT:
+      lcd.begin(16, 2);
+	    lcd.clear();
+      opState = OFF;
+    break;
     case OFF:
       welcomeMsg();
       if (buttons & (1 << BUTTON_PUSH)){
@@ -364,7 +369,7 @@ void loop(){
         else if (menuIdx == 2)
           opState = PREP_PID;
         else
-          opState = OFF;
+          opState = INIT;
       }
       break;
 
@@ -386,7 +391,7 @@ void loop(){
       }
 
       if (buttons  & (1<<BUTTON_LONG_PUSH)){
-        opState = OFF;
+        opState = INIT;
       }
       break;
     
@@ -403,7 +408,7 @@ void loop(){
       doAutoTune();
       tuneMsg();
       if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
-        opState = OFF;
+        opState = INIT;
       }  
     break;
 
@@ -426,16 +431,15 @@ void loop(){
         switchDisplay = false;  
       }
       if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
-        opState = OFF;
+        opState = INIT;
       }
       break;
     default:
-      opState = OFF;
+      opState = INIT;
       break;
   }
   updateDisplay();
-  //plot();
-
+  plot();
   analogWrite(pwmPin,pwmValue);
 }
 

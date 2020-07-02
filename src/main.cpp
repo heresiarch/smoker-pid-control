@@ -5,7 +5,8 @@
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
 #include <PID_v1.h>
-
+#include <PIDAutotuner.h>
+#include "Telemetry.h"
 
 #include "MyButton.h"
 #include "RotaryEncoderSwitch.h"
@@ -22,7 +23,7 @@ Adafruit_MAX31865 max = Adafruit_MAX31865(2,4,5,6);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,EncoderType::twoStep);
 MyButton mybutton = MyButton(A2,true,false);
 
-enum operatingState { OFF = 0, SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_PID, RUN_PID};
+enum operatingState { OFF = 0, SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_AUTOTUNE, RUN_AUTOTUNE, PREP_PID, RUN_PID};
 operatingState opState = OFF;
 
 #define RIGHT_MOVE 0
@@ -53,11 +54,16 @@ uint8_t pwmValue = 0;
 
 double outputVal;
 double aggKp=4, aggKi=0.2, aggKd=1;
-double consKp=1, consKi=0.05, consKd=0.25;
-//double consKp=2, consKi=0.1, consKd=0.5;
+//double consKp=1, consKi=0.05, consKd=0.25;
+double consKp=2, consKi=0.1, consKd=0.25;
+float   p = consKp;
+float   i = consKi;
+float   d = consKd;
+PIDAutotuner tuner = PIDAutotuner();
+uint32_t autoStartMicros = 0;
+
 PID myPID(&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
-
-
+#define PID_INTERVAL_US 100000
 
                                                 //0123456789ABCDEF     
 static const char OFF_LINE_00[] PROGMEM =       "BBQ is Off      ";
@@ -66,7 +72,8 @@ static const char SET_T_LINE_00[] PROGMEM =     "Set Temperature ";
 static const char SET_T_LINE_01[] PROGMEM =     "                ";
 static const char SET_TIMER_LINE_00[] PROGMEM = "Set Timer       ";
 static const char SET_TIMER_LINE_01[] PROGMEM = "    min         ";
-static const char MENU_ITEMS [3][17] PROGMEM =  {" Manual Mode    ", 
+static const char MENU_ITEMS [4][17] PROGMEM =  {" Manual Mode    ",
+                                                 " PID Autotune   ",     
                                                  " PID Control    ",
                                                  " Reset          "};
 
@@ -74,6 +81,11 @@ static const char SET_MAN_LINE_00[] PROGMEM =    "Tact:          C";
 static const char SET_MAN_LINE_01[] PROGMEM =    "Ttar:          C";
 static const char SET_MAN_LINE_02[] PROGMEM =    "PWM value       ";
 static const char SET_MAN_LINE_03[] PROGMEM =    "                ";
+
+static const char SET_AUTO_LINE_00[] PROGMEM =    "               ";
+static const char SET_AUTO_LINE_01[] PROGMEM =    "               ";
+
+
 uint8_t menuIdx = 0;
 
 void timer4(void)
@@ -95,6 +107,11 @@ void setup() {
   max.begin(MAX31865_4WIRE);
   Timer4.initialize(1000);
   Timer4.attachInterrupt(timer4);
+  
+  Telemetry.attach_f32_to("p", &p);
+  Telemetry.attach_f32_to("i", &i);
+  Telemetry.attach_f32_to("d", &d);
+ 
 }
 
 float readTemperature(void){
@@ -189,6 +206,11 @@ void menuMsg(){
       strncpy_P(line1, MENU_ITEMS[2], 16);
       line1[0] = '>';
     }
+    else if(menuIdx == 3){
+      strncpy_P(line0, MENU_ITEMS[2], 16);
+      strncpy_P(line1, MENU_ITEMS[3], 16);
+      line1[0] = '>';
+    }
 }
 
 void manualMsg(){
@@ -207,6 +229,34 @@ void manualMsg(){
         strncpy_P(line1, SET_MAN_LINE_03, 16);
         String value = String(pwmValue,10);
         strncpy(line1,value.c_str(),value.length());
+    }
+}
+
+void tuneMsg(){
+  strncpy_P(line0, SET_AUTO_LINE_00, 16);
+  strncpy_P(line1, SET_AUTO_LINE_01, 16);
+  String value = String(currentTemp,1) + " " + String(pwmValue,10);
+  strncpy(line0,value.c_str(),value.length());
+  value = String(tuner.getKp(),2) + " " + String(tuner.getKi(),2) + " " + String(tuner.getKd(),2);
+  strncpy(line1,value.c_str(),value.length());
+}
+
+
+void doAutoTune(void){
+    uint32_t currentMicros = micros();
+    
+    if(!tuner.isFinished()){
+      if(currentMicros - autoStartMicros >= PID_INTERVAL_US){
+        autoStartMicros = currentMicros;
+        double output = tuner.tunePID(currentTemp);
+        pwmValue = output;
+      }
+    }  
+    else{
+      consKp = tuner.getKp();
+      consKi = tuner.getKi();
+      consKd = tuner.getKd();
+      
     }
 }
 
@@ -240,6 +290,23 @@ void updateDisplay(void){
   lcd.setCursor(0, 1);
   lcd.print(line1); 
 }
+
+void plot(){
+  //Serial.print(pwmValue);      //the first variable for plotting
+  //Serial.print(",");              //seperator
+  //Serial.print(currentTemp);
+  //Serial.print(",");              //seperator
+  //Serial.println(targetTemp);
+  Telemetry.pub_f32("ctemp",currentTemp);
+  Telemetry.pub_u8("pwm",pwmValue);
+  Telemetry.pub_f32("ttemp",targetTemp);
+  Telemetry.update();
+  consKp = p;
+  consKi = i;
+  consKd = d;
+  delay(20);
+}
+
 
 void loop(){
   // always read temperature
@@ -283,7 +350,7 @@ void loop(){
 
     case MENU:
       menuMsg();
-      if (buttons  & (1<<LEFT_MOVE) && menuIdx < 2){
+      if (buttons  & (1<<LEFT_MOVE) && menuIdx < 3){
          menuIdx++; 
       }
       else if (buttons & (1<<RIGHT_MOVE) && menuIdx > 0){
@@ -293,6 +360,8 @@ void loop(){
         if(menuIdx == 0)
           opState = MANUAL_MODE;
         else if (menuIdx == 1)
+          opState = PREP_AUTOTUNE;
+        else if (menuIdx == 2)
           opState = PREP_PID;
         else
           opState = OFF;
@@ -321,6 +390,23 @@ void loop(){
       }
       break;
     
+    case PREP_AUTOTUNE:
+      tuner.setTargetInputValue(targetTemp);
+      tuner.setLoopInterval(PID_INTERVAL_US);
+      tuner.setOutputRange(MIN_PWM, MAX_PWM);
+      tuner.setZNMode(PIDAutotuner::znModeBasicPID);
+      tuner.startTuningLoop();
+      opState = RUN_AUTOTUNE;  
+    break;
+
+    case RUN_AUTOTUNE:
+      doAutoTune();
+      tuneMsg();
+      if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
+        opState = OFF;
+      }  
+    break;
+
     case PREP_PID:
       myPID.SetMode(MANUAL);
       outputVal = 0.0;
@@ -348,9 +434,8 @@ void loop(){
       break;
   }
   updateDisplay();
-  Serial.println(pwmValue);
-  Serial.println(currentTemp);
-  
+  //plot();
+
   analogWrite(pwmPin,pwmValue);
 }
 

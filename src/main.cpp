@@ -6,10 +6,11 @@
 #include <TimerFour.h>
 #include <PID_v1.h>
 
-#include "Telemetry.h"
+//#include "Telemetry.h"
 #include "MyButton.h"
 #include "RotaryEncoderSwitch.h"
 #include "PlatinumSensor.h"
+#include "bbqfan.h"
 
 
 int pwmPin = 3;
@@ -22,13 +23,14 @@ Adafruit_MAX31865 max = Adafruit_MAX31865(2,4,5,6);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(A0,A1,EncoderType::twoStep);
 MyButton mybutton = MyButton(A2,true,false);
 
-enum operatingState { INIT = 0, OFF,SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_PID, RUN_PID};
+enum operatingState { INIT = 0, OFF,SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_FUZZY, RUN_FUZZY, PREP_PID, RUN_PID};
 operatingState opState = OFF;
 
 #define RIGHT_MOVE 0
 #define LEFT_MOVE 1
 #define BUTTON_PUSH 2
 #define BUTTON_LONG_PUSH 3
+
 
 uint16_t startMillis;  //some global variables available anywhere in the program
 uint16_t currentMillis;
@@ -58,9 +60,10 @@ float   p = consKp;
 float   i = consKi;
 float   d = consKd;
 
-uint32_t autoStartMicros = 0;
-
 PID myPID(&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
+BBQFan bbqfan(currentTemp, targetTemp, pwmValue);
+unsigned long lastFuzzy = 0;
+#define FUZZY_PERIOD_MS 5000
                                                 //0123456789ABCDEF     
 static const char OFF_LINE_00[] PROGMEM =       "BBQ is Off      ";
 static const char OFF_LINE_01[] PROGMEM =       "Press Button    ";
@@ -68,8 +71,9 @@ static const char SET_T_LINE_00[] PROGMEM =     "Set Temperature ";
 static const char SET_T_LINE_01[] PROGMEM =     "                ";
 static const char SET_TIMER_LINE_00[] PROGMEM = "Set Timer       ";
 static const char SET_TIMER_LINE_01[] PROGMEM = "    min         ";
-static const char MENU_ITEMS [3][17] PROGMEM =  {" Manual Mode    ",
+static const char MENU_ITEMS [4][17] PROGMEM =  {" Manual Mode    ",
                                                  " PID Control    ",
+                                                 " Fuzzy          ",     
                                                  " Reset          "};
 
 static const char SET_MAN_LINE_00[] PROGMEM =    "Tact:          C";
@@ -102,9 +106,11 @@ void setup() {
   max.begin(MAX31865_4WIRE);
   Timer4.initialize(1000);
   Timer4.attachInterrupt(timer4);
+  /*
   Telemetry.attach_f32_to("p", &p);
   Telemetry.attach_f32_to("i", &i);
   Telemetry.attach_f32_to("d", &d);
+  */
   opState = INIT;
 }
 
@@ -200,6 +206,11 @@ void menuMsg(){ //TODO rework scrolling too many ifs
       strncpy_P(line1, MENU_ITEMS[2], 16);
       line1[0] = '>';
     }
+    else if(menuIdx == 3){
+      strncpy_P(line0, MENU_ITEMS[2], 16);
+      strncpy_P(line1, MENU_ITEMS[3], 16);
+      line1[0] = '>';
+    }
 }
 
 void manualMsg(){
@@ -219,6 +230,13 @@ void manualMsg(){
         String value = String(pwmValue,10);
         strncpy(line1,value.c_str(),value.length());
     }
+}
+
+void doFuzzy(void){
+  if (millis() - lastFuzzy >= FUZZY_PERIOD_MS){
+    lastFuzzy = millis();  //get ready for the next iteration
+    bbqfan.handle();
+  }
 }
 
 void doControll(void){
@@ -243,7 +261,7 @@ void doControll(void){
       pwmValue = MAX_PWM;
     }
   }
-}
+ }
 
 void updateDisplay(void){
   lcd.setCursor(0, 0);
@@ -251,22 +269,6 @@ void updateDisplay(void){
   lcd.setCursor(0, 1);
   lcd.print(line1); 
 }
-
-void plot(){
-  //Serial.print(pwmValue);      //the first variable for plotting
-  //Serial.print(",");              //seperator
-  //Serial.print(currentTemp);
-  //Serial.print(",");              //seperator
-  //Serial.println(targetTemp);
-  
-  Telemetry.pub_f32("ctemp",currentTemp);
-  Telemetry.pub_u8("pwm",pwmValue);
-  Telemetry.pub_f32("ttemp",targetTemp);
-  Telemetry.update();
-  delay(20);
-}
-
-
 void loop(){
   // always read temperature
   currentTemp = readTemperature();
@@ -277,6 +279,8 @@ void loop(){
       lcd.begin(16, 2);
 	    lcd.clear();
       opState = OFF;
+      pwmValue = 0;
+      outputVal = 0.0;
     break;
     case OFF:
       welcomeMsg();
@@ -325,6 +329,8 @@ void loop(){
           opState = MANUAL_MODE;
         else if (menuIdx == 1)
           opState = PREP_PID;
+        else if (menuIdx == 2)
+          opState = PREP_FUZZY;
         else
           opState = INIT;
       }
@@ -351,7 +357,25 @@ void loop(){
         opState = INIT;
       }
       break;
-    
+    case PREP_FUZZY:
+      bbqfan.init();
+      opState = RUN_FUZZY;
+    break;
+    case RUN_FUZZY:
+      manualMsg();
+      doFuzzy();
+      if (buttons  & (1<<LEFT_MOVE) || buttons & (1<<RIGHT_MOVE) ){
+        switchDisplay = true;
+        startMillisDisplay = currentMillis;
+      }
+      currentMillisDisplay = millis();
+      if(switchDisplay && currentMillisDisplay - startMillisDisplay >= periodDisplay){
+        switchDisplay = false;  
+      }
+      if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
+        opState = INIT;
+      }
+      break;
     
     case PREP_PID:
       myPID.SetMode(MANUAL);
@@ -380,7 +404,6 @@ void loop(){
       break;
   }
   updateDisplay();
-  plot();
   analogWrite(pwmPin,pwmValue);
 }
 

@@ -2,14 +2,13 @@
 #include "bbqfan.h"
 
 
-BBQFan::BBQFan(double &currentTemp, double &targetTemp, uint8_t &pwmValue):
+BBQFan::BBQFan(const double &currentTemp, const double &targetTemp, uint8_t &pwmValue):
     m_currentTemp(currentTemp), m_setPoint(targetTemp), m_pwmValue(pwmValue){
        
     m_tempLast = m_currentTemp;
     m_tempLastError = 0.0;
     m_pwmValue = pwmValue;
     m_fuzzy = new Fuzzy();
-    m_setPoint = targetTemp;
 }
 
 BBQFan::~BBQFan() {

@@ -6,7 +6,6 @@
 #include <TimerFour.h>
 #include <PID_v1.h>
 
-//#include "Telemetry.h"
 #include "MyButton.h"
 #include "RotaryEncoderSwitch.h"
 #include "PlatinumSensor.h"
@@ -56,15 +55,12 @@ uint8_t pwmValue = 0;
 double outputVal;
 double aggKp=8, aggKi=0.2, aggKd=1;
 double consKp=2, consKi=0.05, consKd=0.25;
-float   p = consKp;
-float   i = consKi;
-float   d = consKd;
 
 PID myPID(&currentTemp, &outputVal, &targetTemp, consKp, consKi, consKd, DIRECT);
 BBQFan bbqfan(currentTemp, targetTemp, pwmValue);
 unsigned long lastFuzzy = 0;
 #define FUZZY_PERIOD_MS 5000
-                                                //0123456789ABCDEF     
+                                               //0123456789ABCDEF     
 static const char OFF_LINE_00[] PROGMEM =       "BBQ is Off      ";
 static const char OFF_LINE_01[] PROGMEM =       "Press Button    ";
 static const char SET_T_LINE_00[] PROGMEM =     "Set Temperature ";
@@ -224,6 +220,7 @@ void manualMsg(){
       value = "Ttar: " + String(targetTemp,2);
       strncpy(line1,value.c_str(),value.length());
     }
+    
     else{
         strncpy_P(line0, SET_MAN_LINE_02, 16);
         strncpy_P(line1, SET_MAN_LINE_03, 16);

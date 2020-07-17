@@ -10,5 +10,5 @@ class PlatinumSensor {
 
     public:
     // for a PT1000 Element it RZero will be 1000 for a PT100 100
-    static double tempFromPtResistance(double R, double Rzero); 
+    static float tempFromPtResistance(float R, float Rzero); 
 };

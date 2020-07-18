@@ -41,8 +41,9 @@ Adafruit_MAX31865 max = Adafruit_MAX31865(7,8,9,10);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(6,5,EncoderType::twoStep);
 MyButton mybutton = MyButton(4,true,false);
 
-enum operatingState { INIT = 0, OFF,SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_FUZZY, RUN_FUZZY, PREP_PID, RUN_PID};
+enum operatingState { INIT = 0, OFF,SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_FUZZY, RUN_FUZZY, PREP_PID, RUN_PID, AUTO_TIMER};
 operatingState opState = OFF;
+operatingState history = OFF;
 
 #define RIGHT_MOVE 0
 #define LEFT_MOVE 1
@@ -60,7 +61,9 @@ double targetTemp = 60.0;
 #define TARGET_TEMP_MIN 20.0
 #define TIMER_MAX 840
 #define TIMER_MIN 5
-uint16_t targetTimer = TIMER_MIN;
+uint32_t targetTimer = TIMER_MIN;
+uint32_t countDown = 0;
+uint32_t lastTime = 0;
 
 uint8_t pwmValue = 0;
 #define MAX_PWM  255
@@ -77,20 +80,20 @@ unsigned long lastFuzzy = 0;
 
 const char s_00[] PROGMEM = "BBQ is Off    \0";
 const char s_01[] PROGMEM = "Press Button  \0";
-const char s_02[] PROGMEM = "Set Temp in °C\0";
+const char s_02[] PROGMEM = "Set Temp in  C\0";
 const char s_03[] PROGMEM = "Set Timer min \0";
 const char s_04[] PROGMEM = " Manual Mode  \0";
 const char s_05[] PROGMEM = " PID Control  \0";
 const char s_06[] PROGMEM = " Fuzzy        \0";     
 const char s_07[] PROGMEM = " Reset        \0";
-const char s_08[] PROGMEM = "PWM:            \0";
-const char s_09[] PROGMEM = "Tact:           \0";
-const char s_10[] PROGMEM = "Ttar:           \0";     
-const char s_11[] PROGMEM = "Timer           \0";
-const char s_12[] PROGMEM = "                \0";
-
-
+const char s_08[] PROGMEM = "PWM:           \0";
+const char s_09[] PROGMEM = "Tact   C:      \0";
+const char s_10[] PROGMEM = "Ttar   C:      \0";     
+const char s_11[] PROGMEM = "Timer          \0";
+const char s_12[] PROGMEM = "               \0";
 const char *const string_table[] PROGMEM = {s_00,s_01,s_02,s_03,s_04,s_05,s_06,s_07,s_08,s_09,s_10,s_11,s_12};
+
+uint8_t menuIdx = 0;
 
 char buffer[30];
 char* fillBuffer(int i){
@@ -98,8 +101,6 @@ char* fillBuffer(int i){
   strcpy_P(buffer, (char *)pgm_read_word(&(string_table[i])));
   return buffer;
 }
-uint8_t menuIdx = 0;
-
 
 void timer4(void)
 {
@@ -163,12 +164,19 @@ void targetTempMsg(void){
   oledWriteString(&ssoled, 0,0,0,fillBuffer(2), FONT_NORMAL, 0, 1);
   dtostrf(targetTemp, 3, 0, buffer);
   oledWriteString(&ssoled, 0,0,3, buffer , FONT_NORMAL, 0, 1);
+  oledEllipse(&ssoled, 10*8, 3*8, 4, 6, 1, 0);
 }
 
 void timerMsg(void){
   oledWriteString(&ssoled, 0,0,0,fillBuffer(3), FONT_NORMAL, 0, 1);
   // seems to be stupid but itoa does not right padding and sprintf eats my flash
-  dtostrf(targetTimer, 3, 0, buffer);
+  uint8_t hours = targetTimer / 60;
+  uint8_t minutes = targetTimer % 60;
+  dtostrf(hours, 2, 0, &buffer[0]);
+  buffer[2] = ':';
+  dtostrf(minutes, 2, 0, &buffer[3]); 
+  if(minutes < 10)
+    buffer[3] = '0';
   oledWriteString(&ssoled, 0,0,3, buffer , FONT_NORMAL, 0, 1);
 }
 
@@ -193,37 +201,47 @@ void manualMsg(){
   dtostrf(targetTemp, 6, 1, &buffer[7]);
   oledWriteString(&ssoled, 0,0,4,buffer, FONT_NORMAL, 0, 1);
   fillBuffer(11);
-  dtostrf(targetTimer, 6, 0, &buffer[5]);
+  
+  uint32_t seconds = (countDown / 1000) % 60 ;
+  uint32_t minutes = ((countDown / (1000*60)) % 60);
+  uint32_t hours   = countDown / 1000 / 3600;
+
+  dtostrf(hours, 2, 0, &buffer[7+0]);
+  buffer[7+2] = ':';
+  dtostrf(minutes, 2, 0, &buffer[7+3]); 
+  if(minutes < 10)
+    buffer[7+3] = '0';
   oledWriteString(&ssoled, 0,0,6,buffer, FONT_NORMAL, 0, 1);
 }
 
-void doFuzzy(void){
-  if (millis() - lastFuzzy >= FUZZY_PERIOD_MS){
-    lastFuzzy = millis();  //get ready for the next iteration
-    bbqfan.handle();
-  }
-}
-
 void doControll(void){
-
-  double gap = targetTemp - currentTemp;
-  if(gap <= -1.0){     
-    pwmValue = 0;
-  }
-  else if(gap > 0 && gap<=10) {  //we're close to setpoint, use conservative tuning parameters
-    myPID.SetTunings(consKp, consKi, consKd);
-    myPID.Compute();
-    pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
-    if(pwmValue > MAX_PWM){
-      pwmValue = MAX_PWM;
+  if(opState == RUN_PID){
+    double gap = targetTemp - currentTemp;
+    if(gap <= -1.0){     
+      pwmValue = 0;
     }
+    else if(gap > 0 && gap<=10) {  //we're close to setpoint, use conservative tuning parameters
+      myPID.SetTunings(consKp, consKi, consKd);
+      myPID.Compute();
+      pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
+      if(pwmValue > MAX_PWM){
+         pwmValue = MAX_PWM;
+      }
+    }
+    else {//we're far from setpoint, use aggressive tuning parameters
+      myPID.SetTunings(aggKp, aggKi, aggKd);
+      myPID.Compute();
+      pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
+      if(pwmValue > MAX_PWM){
+         pwmValue = MAX_PWM;
+      }
+    }  
+      
   }
-  else {//we're far from setpoint, use aggressive tuning parameters
-    myPID.SetTunings(aggKp, aggKi, aggKd);
-    myPID.Compute();
-    pwmValue = map(outputVal, 0, 255, MIN_PWM, 255);
-    if(pwmValue > MAX_PWM){
-      pwmValue = MAX_PWM;
+  else if(opState == RUN_FUZZY){
+    if (millis() - lastFuzzy >= FUZZY_PERIOD_MS){
+      lastFuzzy = millis();  //get ready for the next iteration
+      bbqfan.handle();
     }
   }
  }
@@ -232,6 +250,9 @@ void loop(){
   // always read temperature
   currentTemp = readTemperature();
   uint8_t buttons = readButtons();
+  if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
+        opState = INIT;
+  }
   switch (opState)
   {
     case INIT:
@@ -275,6 +296,7 @@ void loop(){
         opState = MENU;
       }
       break;
+      countDown = targetTimer * 60000;
 
     case MENU:
       menuMsg();
@@ -305,9 +327,8 @@ void loop(){
       else if (buttons & (1<<RIGHT_MOVE) && pwmValue > MIN_PWM){
         pwmValue --;
       }
-      if (buttons  & (1<<BUTTON_LONG_PUSH)){
-        opState = INIT;
-      }
+      history = opState;
+      opState = AUTO_TIMER;
       break;
     case PREP_FUZZY:
       bbqfan.init();
@@ -315,26 +336,30 @@ void loop(){
     break;
     case RUN_FUZZY:
       manualMsg();
-      doFuzzy();
-      if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
-        opState = INIT;
-      }
+      doControll();
+      history = opState;
+      opState = AUTO_TIMER;  
       break;
-    
     case PREP_PID:
       myPID.SetMode(MANUAL);
       outputVal = 0.0;
       myPID.SetMode(AUTOMATIC);
       opState = RUN_PID;
       break;    
-    
     case RUN_PID:
       manualMsg();
       doControll();
-      if (buttons  & (1<<BUTTON_LONG_PUSH)){ 
-        opState = INIT;
-      }
+      history = opState;
+      opState = AUTO_TIMER;
       break;
+    case AUTO_TIMER:
+      opState = history;
+      if(millis() - lastTime >= 1000){
+        lastTime = millis();
+        countDown -= 1000;
+        Serial.println(countDown);
+      }
+    break;
     default:
       opState = INIT;
       break;

@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
-#include <Wire.h>
 
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
@@ -41,7 +40,7 @@ Adafruit_MAX31865 max = Adafruit_MAX31865(7,8,9,10);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(6,5,EncoderType::twoStep);
 MyButton mybutton = MyButton(4,true,false);
 
-enum operatingState { INIT = 0, OFF,SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_FUZZY, RUN_FUZZY, PREP_PID, RUN_PID, AUTO_TIMER};
+enum operatingState { INIT = 0, OFF,SET_TEMP, SET_TIMER, MENU, MANUAL_MODE, PREP_FUZZY, RUN_FUZZY, PREP_PID, RUN_PID, AUTO_TIMER,FINISH};
 operatingState opState = OFF;
 operatingState history = OFF;
 
@@ -78,27 +77,29 @@ BBQFan bbqfan(currentTemp, targetTemp, pwmValue);
 unsigned long lastFuzzy = 0;
 #define FUZZY_PERIOD_MS 5000
 
-const char s_00[] PROGMEM = "BBQ is Off    \0";
-const char s_01[] PROGMEM = "Press Button  \0";
-const char s_02[] PROGMEM = "Set Temp in  C\0";
-const char s_03[] PROGMEM = "Set Timer min \0";
-const char s_04[] PROGMEM = " Manual Mode  \0";
-const char s_05[] PROGMEM = " PID Control  \0";
-const char s_06[] PROGMEM = " Fuzzy        \0";     
-const char s_07[] PROGMEM = " Reset        \0";
-const char s_08[] PROGMEM = "PWM:           \0";
-const char s_09[] PROGMEM = "Tact   C:      \0";
-const char s_10[] PROGMEM = "Ttar   C:      \0";     
-const char s_11[] PROGMEM = "Timer          \0";
-const char s_12[] PROGMEM = "               \0";
-const char *const string_table[] PROGMEM = {s_00,s_01,s_02,s_03,s_04,s_05,s_06,s_07,s_08,s_09,s_10,s_11,s_12};
+const char s_00[] = "BBQ is Off    \0";
+const char s_01[] = "Press Button  \0";
+const char s_02[]  = "Set Temp in  C\0";
+const char s_03[]  = "Set Timer min \0";
+const char s_04[]  = " Manual Mode  \0";
+const char s_05[]  = " PID Control  \0";
+const char s_06[]  = " Fuzzy        \0";     
+const char s_07[]  = " Reset        \0";
+const char s_08[]  = "PWM:           \0";
+const char s_09[] = "Tact           \0";
+const char s_10[]  = "Ttar           \0";     
+const char s_11[]  = "Timer          \0";
+const char s_12[]  = "               \0";
+const char s_13[]  = "**** Ready ****\0";
+const char s_14[]  = "** Enjoy it! **\0";
+const char *const string_table[]  = {s_00,s_01,s_02,s_03,s_04,s_05,s_06,s_07,s_08,s_09,s_10,s_11,s_12,s_13,s_14};
 
 uint8_t menuIdx = 0;
 
 char buffer[30];
 char* fillBuffer(int i){
   memset(buffer, 0, sizeof(buffer));
-  strcpy_P(buffer, (char *)pgm_read_word(&(string_table[i])));
+  strcpy(buffer, string_table[i]);
   return buffer;
 }
 
@@ -172,6 +173,7 @@ void timerMsg(void){
   // seems to be stupid but itoa does not right padding and sprintf eats my flash
   uint8_t hours = targetTimer / 60;
   uint8_t minutes = targetTimer % 60;
+  countDown = targetTimer * 60;
   dtostrf(hours, 2, 0, &buffer[0]);
   buffer[2] = ':';
   dtostrf(minutes, 2, 0, &buffer[3]); 
@@ -201,17 +203,26 @@ void manualMsg(){
   dtostrf(targetTemp, 6, 1, &buffer[7]);
   oledWriteString(&ssoled, 0,0,4,buffer, FONT_NORMAL, 0, 1);
   fillBuffer(11);
-  
-  uint32_t seconds = (countDown / 1000) % 60 ;
-  uint32_t minutes = ((countDown / (1000*60)) % 60);
-  uint32_t hours   = countDown / 1000 / 3600;
-
+  uint8_t hours = (countDown/3600); 
+	uint8_t minutes = (countDown -(3600*hours))/60;
+	uint8_t seconds = (countDown -(3600*hours)-(minutes*60));
   dtostrf(hours, 2, 0, &buffer[7+0]);
   buffer[7+2] = ':';
   dtostrf(minutes, 2, 0, &buffer[7+3]); 
   if(minutes < 10)
     buffer[7+3] = '0';
+  buffer[7+5] = ':';  
+  dtostrf(seconds, 2, 0, &buffer[7+6]); 
+  if(minutes < 10)
+    buffer[7+3] = '0';  
   oledWriteString(&ssoled, 0,0,6,buffer, FONT_NORMAL, 0, 1);
+}
+
+void finishMsg(void){
+  fillBuffer(13);
+  oledWriteString(&ssoled, 0,0,0,buffer, FONT_NORMAL, 1, 1);
+  fillBuffer(14);
+  oledWriteString(&ssoled, 0,0,1,buffer, FONT_NORMAL, 1, 1);
 }
 
 void doControll(void){
@@ -356,9 +367,15 @@ void loop(){
       opState = history;
       if(millis() - lastTime >= 1000){
         lastTime = millis();
-        countDown -= 1000;
-        Serial.println(countDown);
+        countDown -= 1;
       }
+      if(countDown == 0){
+        oledFill(&ssoled, 0, 1);
+        opState = FINISH;
+      }
+    break;
+    case FINISH:
+        finishMsg();
     break;
     default:
       opState = INIT;

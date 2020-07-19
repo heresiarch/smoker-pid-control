@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "bbqfan.h"
 
 
@@ -77,11 +76,9 @@ void BBQFan::init() {
 }
 
 void BBQFan::handle() {
-    Serial.println(m_currentTemp - m_setPoint);
     m_fuzzy->setInput(1, m_currentTemp - m_setPoint);
     m_fuzzy->fuzzify();
     m_pwmValue = m_fuzzy->defuzzify(1);
     if(m_pwmValue < 30)
         m_pwmValue = 0;
-    Serial.println(m_pwmValue);
 }

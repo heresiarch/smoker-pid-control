@@ -213,8 +213,8 @@ void manualMsg(){
     buffer[7+3] = '0';
   buffer[7+5] = ':';  
   dtostrf(seconds, 2, 0, &buffer[7+6]); 
-  if(minutes < 10)
-    buffer[7+3] = '0';  
+  if(seconds < 10)
+    buffer[7+6] = '0';  
   oledWriteString(&ssoled, 0,0,6,buffer, FONT_NORMAL, 0, 1);
 }
 

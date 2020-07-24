@@ -25,4 +25,4 @@ Overall I could hold constant temperature of 110 °C over 4 hours with 1 char ba
 * [Smokerduino on Instructables](https://www.instructables.com/id/Smokerduino/)
 * [Fuzzy based BBQ Controler Project](https://github.com/rvt/bbq-controller)
 * [Small OLED Library ss_oled](https://github.com/bitbank2/ss_oled)
-* [Another small OLED Library SSD1306Ascii] (https://github.com/greiman/SSD1306Ascii)
+* [Another small OLED Library SSD1306Ascii](https://github.com/greiman/SSD1306Ascii)

@@ -4,7 +4,11 @@
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
 #include <PID_v1.h>
-#include <ss_oled.h>
+//#include <ss_oled.h>
+
+#include <Wire.h>
+#include "SSD1306Ascii.h"
+#include "SSD1306AsciiWire.h"
 
 #include "MyButton.h"
 #include "RotaryEncoderSwitch.h"
@@ -34,7 +38,10 @@ int pwmPin = 11;
 #define MY_OLED OLED_128x64
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 64
-SSOLED ssoled;
+
+//SSOLED ssoled;
+SSD1306AsciiWire oled;
+
 
 Adafruit_MAX31865 max = Adafruit_MAX31865(7,8,9,10);
 RotaryEnoderSwitch rot = RotaryEnoderSwitch(6,5,EncoderType::twoStep);
@@ -119,7 +126,25 @@ void setup() {
   Timer4.initialize(1000);
   Timer4.attachInterrupt(timer4);
   opState = INIT;
-  oledInit(&ssoled, MY_OLED, OLED_ADDR, FLIP180, INVERT, USE_HW_I2C, SDA_PIN, SCL_PIN, RESET_PIN, 400000L); // use standard I2C bus at 400Khz
+  //oledInit(&ssoled, MY_OLED, OLED_ADDR, FLIP180, INVERT, USE_HW_I2C, SDA_PIN, SCL_PIN, RESET_PIN, 400000L); // use standard I2C bus at 400Khz
+  
+  Wire.begin();
+  Wire.setClock(400000L);
+  oled.begin(&SH1106_128x64, OLED_ADDR);
+  oled.setFont(Adafruit5x7);
+  oled.clear();
+  /*
+  uint32_t m = micros();
+  oled.clear();
+  oled.println("Hello world!");
+  oled.println("A long line may be truncated");
+  oled.println();
+  oled.set2X();
+  oled.println("2X demo");
+  oled.set1X();
+  oled.print("\nmicros: ");
+  oled.print(micros() - m);
+  */
  }
 
 float readTemperature(void){
@@ -156,21 +181,21 @@ uint8_t readButtons()
 }
 
 void welcomeMsg(void){
-  
-  oledWriteString(&ssoled, 0,0,0,fillBuffer(0), FONT_NORMAL, 0, 1);
-  oledWriteString(&ssoled, 0,0,1,fillBuffer(1), FONT_NORMAL, 0, 1);
+  oled.setCursor(0,0);
+  oled.println(fillBuffer(0));
+  oled.println(fillBuffer(1));
 }
 
 void targetTempMsg(void){
-  oledWriteString(&ssoled, 0,0,0,fillBuffer(2), FONT_NORMAL, 0, 1);
-  dtostrf(targetTemp, 3, 0, buffer);
-  oledWriteString(&ssoled, 0,0,3, buffer , FONT_NORMAL, 0, 1);
-  oledEllipse(&ssoled, 10*8, 3*8, 4, 6, 1, 0);
+  oled.setCursor(0,0);
+  oled.println(fillBuffer(2));
+  oled.setCursor(0,3);
+  oled.print(targetTemp,0);
 }
 
 void timerMsg(void){
-  oledWriteString(&ssoled, 0,0,0,fillBuffer(3), FONT_NORMAL, 0, 1);
-  // seems to be stupid but itoa does not right padding and sprintf eats my flash
+  oled.setCursor(0,0);
+  oled.println(fillBuffer(3));
   uint8_t hours = targetTimer / 60;
   uint8_t minutes = targetTimer % 60;
   countDown = targetTimer * 60;
@@ -179,50 +204,61 @@ void timerMsg(void){
   dtostrf(minutes, 2, 0, &buffer[3]); 
   if(minutes < 10)
     buffer[3] = '0';
-  oledWriteString(&ssoled, 0,0,3, buffer , FONT_NORMAL, 0, 1);
+  oled.setCursor(0,3);  
+  oled.println(buffer);
 }
 
 void menuMsg(){ //TODO rework scrolling too many ifs
+  oled.setCursor(0,0);
   for(uint8_t i =0; i < 4; i++){
     fillBuffer(4+i);
     if(i == menuIdx){
       buffer[0] ='*';
     }
-    oledWriteString(&ssoled, 0,0,i,buffer, FONT_NORMAL, 0, 1);
+    oled.println(buffer);
   }
 }
 
 void manualMsg(){
+  oled.setCursor(0,0);
+  
   fillBuffer(8);
-  dtostrf(pwmValue, 6, 0, &buffer[5]);
-  oledWriteString(&ssoled, 0,0,0,buffer, FONT_NORMAL, 0, 1);
+  dtostrf(pwmValue, 3, 0, &buffer[7]);
+  oled.println(buffer);
+  oled.println();
+  
   fillBuffer(9);
   dtostrf(currentTemp, 6, 1, &buffer[7]);
-  oledWriteString(&ssoled, 0,0,2,buffer, FONT_NORMAL, 0, 1);
+  oled.println(buffer);
+  oled.println();
+  
   fillBuffer(10);
   dtostrf(targetTemp, 6, 1, &buffer[7]);
-  oledWriteString(&ssoled, 0,0,4,buffer, FONT_NORMAL, 0, 1);
+  oled.println(buffer);
+  oled.println();
+  
   fillBuffer(11);
   uint8_t hours = (countDown/3600); 
 	uint8_t minutes = (countDown -(3600*hours))/60;
 	uint8_t seconds = (countDown -(3600*hours)-(minutes*60));
-  dtostrf(hours, 2, 0, &buffer[7+0]);
-  buffer[7+2] = ':';
-  dtostrf(minutes, 2, 0, &buffer[7+3]); 
+  dtostrf(hours, 2, 0, &buffer[6+0]);
+  buffer[6+2] = ':';
+  dtostrf(minutes, 2, 0, &buffer[6+3]); 
   if(minutes < 10)
-    buffer[7+3] = '0';
-  buffer[7+5] = ':';  
-  dtostrf(seconds, 2, 0, &buffer[7+6]); 
+    buffer[6+3] = '0';
+  buffer[6+5] = ':';  
+  dtostrf(seconds, 2, 0, &buffer[6+6]); 
   if(seconds < 10)
-    buffer[7+6] = '0';  
-  oledWriteString(&ssoled, 0,0,6,buffer, FONT_NORMAL, 0, 1);
+    buffer[6+6] = '0';  
+  oled.println(buffer);
 }
 
 void finishMsg(void){
-  fillBuffer(13);
-  oledWriteString(&ssoled, 0,0,0,buffer, FONT_NORMAL, 1, 1);
-  fillBuffer(14);
-  oledWriteString(&ssoled, 0,0,1,buffer, FONT_NORMAL, 1, 1);
+  
+  oled.setInvertMode(true);
+  oled.setCursor(0,0);
+  oled.println(fillBuffer(13));
+  oled.println(fillBuffer(14));
 }
 
 void doControll(void){
@@ -270,13 +306,14 @@ void loop(){
       opState = OFF;
       pwmValue = 0;
       outputVal = 0.0;
-      oledFill(&ssoled, 0, 1);
+      oled.setInvertMode(false);
+      oled.clear();
     break;
     case OFF:
       welcomeMsg();
       if (buttons & (1 << BUTTON_PUSH)){
         opState = SET_TEMP;
-        oledFill(&ssoled, 0, 1);
+        oled.clear();
       }
       pwmValue = 0;
       break;
@@ -291,7 +328,7 @@ void loop(){
       }
       if (buttons & (1 << BUTTON_PUSH)){
         opState = SET_TIMER;
-        oledFill(&ssoled, 0, 1);
+        oled.clear();
       }
       break;
     
@@ -326,7 +363,7 @@ void loop(){
           opState = PREP_FUZZY;
         else
           opState = INIT;
-        oledFill(&ssoled, 0, 1);  
+        oled.clear();  
       }
       break;
 
@@ -335,7 +372,7 @@ void loop(){
       if (buttons  & (1<<LEFT_MOVE) && pwmValue < MAX_PWM){
         pwmValue ++;
       }
-      else if (buttons & (1<<RIGHT_MOVE) && pwmValue > MIN_PWM){
+      else if (buttons & (1<<RIGHT_MOVE) && pwmValue > 0){
         pwmValue --;
       }
       history = opState;
@@ -370,7 +407,7 @@ void loop(){
         countDown -= 1;
       }
       if(countDown == 0){
-        oledFill(&ssoled, 0, 1);
+        oled.clear();
         opState = FINISH;
       }
     break;
@@ -383,5 +420,6 @@ void loop(){
   }
   analogWrite(pwmPin,pwmValue);
 }
+
 
 

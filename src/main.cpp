@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
-#include <avr/wdt.h>
 
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
@@ -113,8 +112,6 @@ void setup()
   // PWM on Pin 3
   //http://www.scynd.de/tutorials/arduino-tutorials/3-luefter-steuern/3-1-pwm-ohne-pfeifen.html
   //TCCR1B = TCCR1B & 0b11111000 | 0x01;
-  // enable WDT
-  wdt_enable(WDTO_8S);  
   pinMode(pwmPin, OUTPUT);
   max.begin(MAX31865_4WIRE);
   Timer4.initialize(1000);
@@ -420,15 +417,17 @@ void loop()
     {
       oled.clear();
       opState = FINISH;
+      pwmValue = 0;
     }
     break;
   case FINISH:
     finishMsg();
+    tone(18, 2400, 250);
+    delay(1000);
     break;
   default:
     opState = INIT;
     break;
   }
   analogWrite(pwmPin, pwmValue);
-  wdt_reset();
 }

@@ -213,7 +213,7 @@ void manualMsg()
   oled.setCursor(0, 0);
 
   fillBuffer(8);
-  dtostrf(pwmValue, 3, 0, &buffer[7]);
+  dtostrf(pwmValue, 3, 0, &buffer[8]);
   oled.println(buffer);
   oled.println();
 

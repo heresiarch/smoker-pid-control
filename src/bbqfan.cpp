@@ -8,16 +8,7 @@ BBQFan::BBQFan(const double &currentTemp, const double &targetTemp, uint8_t &pwm
     m_tempLastError = 0.0;
     m_pwmValue = pwmValue;
     m_fuzzy = new Fuzzy();
-}
-
-BBQFan::~BBQFan() {
-}
-
-
-void BBQFan::init() {
-    delete m_fuzzy;
-    m_fuzzy = new Fuzzy();
-    // Create input for Temperature errors
+        // Create input for Temperature errors
     FuzzyInput* tempDiff = new FuzzyInput(1);
     m_fuzzy->addFuzzyInput(tempDiff);
     FuzzySet* cold = new FuzzySet(-120, -30, -30, -20);
@@ -73,6 +64,10 @@ void BBQFan::init() {
     thenLowSpeed->addOutput(lowSpeed);
     FuzzyRule* fuzzyRule04 = new FuzzyRule(4, ifTemperatureHot, thenLowSpeed); 
     m_fuzzy->addFuzzyRule(fuzzyRule04);
+}
+
+BBQFan::~BBQFan() {
+    delete m_fuzzy;
 }
 
 void BBQFan::handle() {

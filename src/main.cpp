@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
+#include <avr/wdt.h>
 
 #include <Adafruit_MAX31865.h>
 #include <TimerFour.h>
@@ -33,7 +34,6 @@ enum operatingState
   SET_TIMER,
   MENU,
   MANUAL_MODE,
-  PREP_FUZZY,
   RUN_FUZZY,
   PREP_PID,
   RUN_PID,
@@ -113,6 +113,8 @@ void setup()
   // PWM on Pin 3
   //http://www.scynd.de/tutorials/arduino-tutorials/3-luefter-steuern/3-1-pwm-ohne-pfeifen.html
   //TCCR1B = TCCR1B & 0b11111000 | 0x01;
+  // enable WDT
+  wdt_enable(WDTO_8S);  
   pinMode(pwmPin, OUTPUT);
   max.begin(MAX31865_4WIRE);
   Timer4.initialize(1000);
@@ -369,7 +371,7 @@ void loop()
       else if (menuIdx == 1)
         opState = PREP_PID;
       else if (menuIdx == 2)
-        opState = PREP_FUZZY;
+        opState = RUN_FUZZY;
       else
         opState = INIT;
       oled.clear();
@@ -388,10 +390,6 @@ void loop()
     }
     history = opState;
     opState = AUTO_TIMER;
-    break;
-  case PREP_FUZZY:
-    bbqfan.init();
-    opState = RUN_FUZZY;
     break;
   case RUN_FUZZY:
     manualMsg();
@@ -432,4 +430,5 @@ void loop()
     break;
   }
   analogWrite(pwmPin, pwmValue);
+  wdt_reset();
 }

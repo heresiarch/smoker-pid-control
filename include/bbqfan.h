@@ -17,7 +17,4 @@ public:
      * Very important, call this once in 5 seconds
      */
     void handle();
-
-    // Fuzzy inputs monitoring
-    void init();
 };

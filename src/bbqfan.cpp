@@ -22,7 +22,7 @@ BBQFan::BBQFan(const double &currentTemp, const double &targetTemp, uint8_t &pwm
     m_fuzzy->addFuzzyInput(tempDiff);
     
     FuzzyOutput* pwm = new FuzzyOutput(1);
-    FuzzySet* lowSpeed = new FuzzySet(0,5,5,25);
+    FuzzySet* lowSpeed = new FuzzySet(0,5,5,16);
     FuzzySet* mediumSpeed = new FuzzySet(10,45,45,90);
     FuzzySet* highSpeed = new FuzzySet(60,128,128,200);
     FuzzySet* veryhighSpeed = new FuzzySet(190,200,200,255);
@@ -74,6 +74,6 @@ void BBQFan::handle() {
     m_fuzzy->setInput(1, m_currentTemp - m_setPoint);
     m_fuzzy->fuzzify();
     m_pwmValue = m_fuzzy->defuzzify(1);
-    if(m_pwmValue < 30)
+    if(m_pwmValue < 16)
         m_pwmValue = 0;
 }

@@ -63,7 +63,7 @@ uint32_t lastTime = 0;
 
 uint8_t pwmValue = 0;
 #define MAX_PWM 255
-#define MIN_PWM 30
+#define MIN_PWM 17
 
 double outputVal;
 double aggKp = 8, aggKi = 0.2, aggKd = 1;

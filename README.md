@@ -16,7 +16,7 @@ Overall I could hold constant temperature of 110 °C over 4 hours with 1 char ba
 
 ## TODO
 * build case
-* eagle circuit/pcb
+* ~eagle circuit/pcb~
 * pictures and real live plot recordings
 * implement meat probe
 * ~implement count down~

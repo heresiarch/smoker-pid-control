@@ -8,20 +8,20 @@
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="yes" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="no"/>
-<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="no"/>
-<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="no"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="no"/>
-<layer number="20" name="Dimension" color="24" fill="1" visible="yes" active="no"/>
-<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="no"/>
-<layer number="28" name="bValues" color="7" fill="1" visible="yes" active="no"/>
+<layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="no"/>
+<layer number="20" name="Dimension" color="24" fill="1" visible="no" active="no"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="no" active="no"/>
+<layer number="28" name="bValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="no"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="no"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="no"/>
@@ -30,8 +30,8 @@
 <layer number="34" name="bFinish" color="6" fill="6" visible="no" active="no"/>
 <layer number="35" name="tGlue" color="7" fill="4" visible="no" active="no"/>
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="no"/>
-<layer number="37" name="tTest" color="7" fill="1" visible="yes" active="no"/>
-<layer number="38" name="bTest" color="7" fill="1" visible="yes" active="no"/>
+<layer number="37" name="tTest" color="7" fill="1" visible="no" active="no"/>
+<layer number="38" name="bTest" color="7" fill="1" visible="no" active="no"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="no"/>
 <layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="no"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="no"/>
@@ -39,19 +39,19 @@
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="no"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="no"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="no" active="no"/>
-<layer number="46" name="Milling" color="3" fill="1" visible="yes" active="no"/>
-<layer number="47" name="Measures" color="7" fill="1" visible="yes" active="no"/>
-<layer number="48" name="Document" color="7" fill="1" visible="yes" active="no"/>
-<layer number="49" name="Reference" color="7" fill="1" visible="yes" active="no"/>
-<layer number="50" name="dxf" color="7" fill="1" visible="yes" active="no"/>
-<layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="no"/>
-<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="no"/>
-<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="yes" active="no"/>
-<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="yes" active="no"/>
-<layer number="56" name="wert" color="7" fill="1" visible="yes" active="no"/>
-<layer number="57" name="tCAD" color="7" fill="1" visible="yes" active="no"/>
-<layer number="59" name="tCarbon" color="7" fill="1" visible="yes" active="no"/>
-<layer number="60" name="bCarbon" color="7" fill="1" visible="yes" active="no"/>
+<layer number="46" name="Milling" color="3" fill="1" visible="no" active="no"/>
+<layer number="47" name="Measures" color="7" fill="1" visible="no" active="no"/>
+<layer number="48" name="Document" color="7" fill="1" visible="no" active="no"/>
+<layer number="49" name="Reference" color="7" fill="1" visible="no" active="no"/>
+<layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
+<layer number="51" name="tDocu" color="7" fill="1" visible="no" active="no"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="no" active="no"/>
+<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
+<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
+<layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
+<layer number="57" name="tCAD" color="7" fill="1" visible="no" active="no"/>
+<layer number="59" name="tCarbon" color="7" fill="1" visible="no" active="no"/>
+<layer number="60" name="bCarbon" color="7" fill="1" visible="no" active="no"/>
 <layer number="88" name="SimResults" color="9" fill="1" visible="yes" active="yes"/>
 <layer number="89" name="SimProbes" color="9" fill="1" visible="yes" active="yes"/>
 <layer number="90" name="Modules" color="5" fill="1" visible="yes" active="yes"/>
@@ -227,11 +227,6 @@
 <wire x1="4.2418" y1="5.3086" x2="4.2418" y2="12.3698" width="0.127" layer="21"/>
 <wire x1="4.2418" y1="12.3698" x2="-0.8382" y2="12.3698" width="0.127" layer="21"/>
 <wire x1="-0.8382" y1="12.3698" x2="-0.8382" y2="5.3086" width="0.127" layer="21"/>
-<smd name="&lt;USB&gt;+V" x="3.1496" y="10.9474" dx="1.27" dy="0.635" layer="1"/>
-<smd name="&lt;USB&gt;D+" x="3.1496" y="9.9568" dx="1.27" dy="0.635" layer="1"/>
-<smd name="&lt;USB&gt;D-" x="3.1496" y="8.9408" dx="1.27" dy="0.635" layer="1"/>
-<smd name="&lt;USB&gt;ID" x="3.1496" y="7.9756" dx="1.27" dy="0.635" layer="1"/>
-<smd name="&lt;USB&gt;GND" x="3.1496" y="6.9596" dx="1.27" dy="0.635" layer="1"/>
 <text x="19.05" y="10.16" size="1.27" layer="21">Arduino</text>
 <text x="19.05" y="8.255" size="1.27" layer="21">Micro</text>
 <text x="4.826" y="15.875" size="0.508" layer="21">1
@@ -286,7 +281,6 @@ V</text>
 3</text>
 </package>
 <package name="MAX31865-BRD">
-<wire x1="12.7" y1="-11.43" x2="12.7" y2="11.43" width="0" layer="21"/>
 <text x="3.81" y="-12.954" size="1.016" layer="21" ratio="15" rot="R180" align="center">SDI</text>
 <text x="-1.143" y="-12.954" size="1.016" layer="21" ratio="15" rot="R180" align="center">CLK</text>
 <text x="6.35" y="-9.652" size="1.016" layer="21" ratio="15" rot="R180" align="center">CS</text>
@@ -300,7 +294,6 @@ V</text>
 <wire x1="12.7" y1="11.43" x2="10.16" y2="13.97" width="0" layer="21" curve="90"/>
 <wire x1="10.16" y1="13.97" x2="-10.16" y2="13.97" width="0" layer="21"/>
 <wire x1="-10.16" y1="13.97" x2="-12.7" y2="11.43" width="0" layer="21" curve="90"/>
-<wire x1="-12.7" y1="11.43" x2="-12.7" y2="-11.43" width="0" layer="21"/>
 <text x="3.81" y="-12.954" size="1.016" layer="21" ratio="15" rot="R180" align="center">SDI</text>
 <text x="-1.143" y="-12.954" size="1.016" layer="21" ratio="15" rot="R180" align="center">CLK</text>
 <text x="6.35" y="-9.652" size="1.016" layer="21" ratio="15" rot="R180" align="center">CS</text>
@@ -321,18 +314,18 @@ V</text>
 <text x="-3.81" y="-9.652" size="1.016" layer="21" ratio="15" rot="R180" align="center">3V3</text>
 <text x="-8.89" y="-9.652" size="1.016" layer="21" ratio="15" rot="R180" align="center">VIN</text>
 <text x="-6.223" y="-12.954" size="1.016" layer="21" ratio="15" rot="R180" align="center">GND</text>
-<pad name="P$1" x="-8.89" y="-11.43" drill="0.6" shape="square"/>
-<pad name="P$2" x="-6.35" y="-11.43" drill="0.6" shape="square"/>
-<pad name="P$3" x="-3.81" y="-11.43" drill="0.6" shape="square"/>
-<pad name="P$4" x="-1.27" y="-11.43" drill="0.6" shape="square"/>
-<pad name="P$5" x="1.27" y="-11.43" drill="0.6" shape="square"/>
-<pad name="P$6" x="3.81" y="-11.43" drill="0.6" shape="square"/>
-<pad name="P$7" x="6.35" y="-11.43" drill="0.6" shape="square"/>
-<pad name="P$8" x="8.89" y="-11.43" drill="0.6" shape="square"/>
+<pad name="P$1" x="-8.89" y="-11.43" drill="0.8" shape="square"/>
+<pad name="P$2" x="-6.35" y="-11.43" drill="0.8" shape="square"/>
+<pad name="P$3" x="-3.81" y="-11.43" drill="0.8" shape="square"/>
+<pad name="P$4" x="-1.27" y="-11.43" drill="0.8" shape="square"/>
+<pad name="P$5" x="1.27" y="-11.43" drill="0.8" shape="square"/>
+<pad name="P$6" x="3.81" y="-11.43" drill="0.8" shape="square"/>
+<pad name="P$7" x="6.35" y="-11.43" drill="0.8" shape="square"/>
+<pad name="P$8" x="8.89" y="-11.43" drill="0.8" shape="square"/>
 </package>
 <package name="1.3&quot;OLED">
-<pad name="VCC" x="0" y="0" drill="0.8" diameter="1.778"/>
-<pad name="GND" x="2.54" y="0" drill="0.8" diameter="1.778"/>
+<pad name="VCC" x="2.54" y="0" drill="0.8" diameter="1.778"/>
+<pad name="GND" x="0" y="0" drill="0.8" diameter="1.778"/>
 <pad name="SCL" x="5.08" y="0" drill="0.8" diameter="1.778"/>
 <pad name="SDA" x="7.62" y="0" drill="0.8" diameter="1.9"/>
 <wire x1="-13.97" y1="1.27" x2="-13.97" y2="-31.73" width="0.127" layer="21"/>
@@ -373,8 +366,8 @@ EC12E series with push-on switch</description>
 <text x="-3.048" y="-3.048" size="0.4064" layer="27" ratio="10">&gt;VALUE</text>
 </package>
 <package name="KC-1206">
-<pad name="PIN+" x="-3.25" y="0" drill="0.6" shape="square"/>
-<pad name="PIN-" x="3.25" y="0" drill="0.6" shape="square"/>
+<pad name="PIN+" x="-3.25" y="0" drill="0.8" shape="square"/>
+<pad name="PIN-" x="3.25" y="0" drill="0.8" shape="square"/>
 <circle x="0" y="0" radius="6" width="0.127" layer="21"/>
 </package>
 </packages>
@@ -419,10 +412,6 @@ EC12E series with push-on switch</description>
 <pin name="REF" x="-12.7" y="-17.78" length="short" rot="R90"/>
 <pin name="3V3" x="-15.24" y="-17.78" length="short" rot="R90"/>
 <pin name="D13" x="-17.78" y="-17.78" length="short" rot="R90"/>
-<pin name="&lt;USB&gt;GND" x="-27.94" y="-7.62" length="short"/>
-<pin name="&lt;USB&gt;D-" x="-27.94" y="-2.54" length="short"/>
-<pin name="&lt;USB&gt;D+" x="-27.94" y="0" length="short"/>
-<pin name="&lt;USB&gt;+V" x="-27.94" y="2.54" length="short"/>
 <wire x1="-25.4" y1="12.7" x2="25.4" y2="12.7" width="0.254" layer="94"/>
 <wire x1="25.4" y1="12.7" x2="25.4" y2="-15.24" width="0.254" layer="94"/>
 <wire x1="25.4" y1="-15.24" x2="-25.4" y2="-15.24" width="0.254" layer="94"/>
@@ -434,7 +423,6 @@ EC12E series with push-on switch</description>
 <pin name="MOSI" x="22.86" y="15.24" length="short" rot="R270"/>
 <pin name="MISO" x="20.32" y="-17.78" length="short" rot="R90"/>
 <pin name="SCK" x="22.86" y="-17.78" length="short" rot="R90"/>
-<pin name="&lt;USB&gt;ID" x="-27.94" y="-5.08" length="short"/>
 </symbol>
 <symbol name="ADAFRUIT-MAX31865-BREAKOUT">
 <description>Breakboard Adafruit</description>
@@ -554,11 +542,6 @@ EC12E series with push-on switch</description>
 <connects>
 <connect gate="G$1" pin="+5V" pad="+5V"/>
 <connect gate="G$1" pin="3V3" pad="3V3"/>
-<connect gate="G$1" pin="&lt;USB&gt;+V" pad="&lt;USB&gt;+V"/>
-<connect gate="G$1" pin="&lt;USB&gt;D+" pad="&lt;USB&gt;D+"/>
-<connect gate="G$1" pin="&lt;USB&gt;D-" pad="&lt;USB&gt;D-"/>
-<connect gate="G$1" pin="&lt;USB&gt;GND" pad="&lt;USB&gt;GND"/>
-<connect gate="G$1" pin="&lt;USB&gt;ID" pad="&lt;USB&gt;ID"/>
 <connect gate="G$1" pin="A0" pad="A0"/>
 <connect gate="G$1" pin="A1" pad="A1"/>
 <connect gate="G$1" pin="A2" pad="A2"/>
@@ -14716,7 +14699,7 @@ Ingenieurbüro ing-rb, mail@ing-rb.de&lt;/p&gt;&lt;/author&gt;</description>
 <part name="P+2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
 <part name="R1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="0207/10" package3d_urn="urn:adsk.eagle:package:23491/2" value="1.2k"/>
 <part name="GND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="R2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="0207/10" package3d_urn="urn:adsk.eagle:package:23491/2" value="1.2k"/>
+<part name="R2" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="0207/15" package3d_urn="urn:adsk.eagle:package:23492/1" value="1.2k"/>
 <part name="R3" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="0207/10" package3d_urn="urn:adsk.eagle:package:23491/2" value="1.2k"/>
 <part name="GND3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="U$3" library="smoker-pid-control" deviceset="KC-1206" device=""/>

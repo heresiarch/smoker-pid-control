@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="50" unitdist="mil" unit="mm" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="mil"/>
+<grid distance="50" unitdist="mil" unit="mil" style="lines" multiple="1" display="no" altdistance="5" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -1906,14 +1906,14 @@ design rules under a new name.</description>
 <element name="PCB1" library="smoker-pid-control" package="ARDUINO_MICRO" value="ARDUINO_MICRO" x="9.398" y="10.795" smashed="yes" grouprefs="G1"/>
 <element name="U$1" library="smoker-pid-control" package="MAX31865-BRD" value="ADAFRUIT-MAX31865" x="19.558" y="48.768" smashed="yes" grouprefs="G1"/>
 <element name="U$2" library="smoker-pid-control" package="1.3&quot;OLED" value="13&quot;OLED13&quot;OLED" x="80.772" y="32.131" smashed="yes" rot="R180" grouprefs="G1"/>
-<element name="SW1" library="smoker-pid-control" package="ALPS_EC12E_SW" package3d_urn="urn:adsk.eagle:package:27083/1" value="EC12E_SW" x="49.142" y="40.771" smashed="yes" rot="R270" grouprefs="G1">
-<attribute name="MF" value="" x="49.142" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="MPN" value="EC12E2424407" x="49.142" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="NAME" x="57.642" y="43.271" size="1.27" layer="25" rot="R270"/>
-<attribute name="OC_FARNELL" value="1520813" x="49.142" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="OC_NEWARK" value="74M1068" x="49.142" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="POPULARITY" value="3" x="49.142" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
-<attribute name="VALUE" x="40.142" y="37.271" size="1.27" layer="27" rot="R90"/>
+<element name="SW1" library="smoker-pid-control" package="ALPS_EC12E_SW" package3d_urn="urn:adsk.eagle:package:27083/1" value="EC12E_SW" x="46.602" y="40.771" smashed="yes" rot="R270" grouprefs="G1">
+<attribute name="MF" value="" x="46.602" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="MPN" value="EC12E2424407" x="46.602" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="NAME" x="55.102" y="43.271" size="1.27" layer="25" rot="R270"/>
+<attribute name="OC_FARNELL" value="1520813" x="46.602" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="OC_NEWARK" value="74M1068" x="46.602" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="POPULARITY" value="3" x="46.602" y="40.771" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="VALUE" x="37.602" y="37.271" size="1.27" layer="27" rot="R90"/>
 </element>
 <element name="POWER" library="smoker-pid-control" package="TERMBLOCK_1X2-3.5MM" value="12V" x="90.551" y="9.779" smashed="yes" rot="R90" grouprefs="G1">
 <attribute name="NAME" x="86.661" y="6.779" size="0.8128" layer="25" ratio="18" rot="R90"/>
@@ -2059,15 +2059,14 @@ design rules under a new name.</description>
 <contactref element="R5" pad="1"/>
 <wire x1="73.66" y1="22.86" x2="73.66" y2="18.669" width="0.8128" layer="16"/>
 <wire x1="73.66" y1="18.669" x2="69.342" y2="14.351" width="0.8128" layer="16"/>
-<wire x1="41.642" y1="40.771" x2="43.311" y2="40.771" width="0.8128" layer="16"/>
-<wire x1="43.311" y1="40.771" x2="44.45" y2="41.91" width="0.8128" layer="16"/>
-<wire x1="44.45" y1="41.91" x2="44.45" y2="53.34" width="0.8128" layer="16"/>
-<wire x1="44.45" y1="53.34" x2="39.37" y2="53.34" width="0.8128" layer="16"/>
+<wire x1="39.102" y1="40.771" x2="43.18" y2="40.771" width="0.8128" layer="16"/>
+<wire x1="43.18" y1="40.771" x2="43.18" y2="53.34" width="0.8128" layer="16"/>
+<wire x1="43.18" y1="53.34" x2="39.37" y2="53.34" width="0.8128" layer="16"/>
 <wire x1="36.83" y1="50.8" x2="36.83" y2="46.99" width="0.8128" layer="16"/>
 <wire x1="36.83" y1="46.99" x2="36.556715625" y2="46.716715625" width="0.6096" layer="16"/>
 <wire x1="36.556715625" y1="46.716715625" x2="20.427715625" y2="46.716715625" width="0.8128" layer="16"/>
 <wire x1="39.37" y1="53.34" x2="36.83" y2="50.8" width="0.8128" layer="16"/>
-<wire x1="57.15" y1="43.271" x2="56.142" y2="43.271" width="0.8128" layer="16"/>
+<wire x1="57.15" y1="43.271" x2="53.602" y2="43.271" width="0.8128" layer="16"/>
 <wire x1="57.15" y1="48.26" x2="57.15" y2="43.271" width="0.8128" layer="16"/>
 <wire x1="64.516" y1="25.856" x2="64.972" y2="25.4" width="0.8128" layer="16"/>
 <wire x1="64.972" y1="25.4" x2="73.66" y2="25.4" width="0.8128" layer="16"/>
@@ -2092,8 +2091,8 @@ design rules under a new name.</description>
 <vertex x="0.635" y="1.143"/>
 </polygon>
 <wire x1="58.42" y1="48.26" x2="57.15" y2="48.26" width="0.8128" layer="16"/>
-<wire x1="44.45" y1="53.34" x2="45.72" y2="54.61" width="0.8128" layer="16"/>
-<wire x1="45.72" y1="54.61" x2="57.15" y2="54.61" width="0.8128" layer="16"/>
+<wire x1="43.18" y1="53.34" x2="44.45" y2="54.61" width="0.8128" layer="16"/>
+<wire x1="44.45" y1="54.61" x2="57.15" y2="54.61" width="0.8128" layer="16"/>
 <wire x1="57.15" y1="54.61" x2="58.42" y2="53.34" width="0.8128" layer="16"/>
 <wire x1="58.42" y1="53.34" x2="58.42" y2="48.26" width="0.8128" layer="16"/>
 </signal>
@@ -2123,14 +2122,14 @@ design rules under a new name.</description>
 <contactref element="R1" pad="1"/>
 <contactref element="SW1" pad="E"/>
 <contactref element="PCB1" pad="D4"/>
-<wire x1="53.34" y1="47.879" x2="55.372" y2="49.911" width="0.8128" layer="16"/>
-<wire x1="53.34" y1="41.073" x2="53.34" y2="47.879" width="0.8128" layer="16"/>
+<wire x1="54.102" y1="49.911" x2="55.372" y2="49.911" width="0.8128" layer="16"/>
+<wire x1="54.102" y1="49.911" x2="50.8" y2="46.609" width="0.8128" layer="16"/>
+<wire x1="50.8" y1="41.073" x2="50.8" y2="46.609" width="0.8128" layer="16"/>
 <wire x1="53.602" y1="31.921" x2="35.731" y2="31.921" width="0.8128" layer="16"/>
-<wire x1="56.142" y1="34.461" x2="53.602" y2="31.921" width="0.8128" layer="16"/>
-<wire x1="56.142" y1="34.461" x2="56.142" y2="38.271" width="0.8128" layer="16"/>
+<wire x1="53.602" y1="31.921" x2="53.602" y2="38.271" width="0.8128" layer="16"/>
 <wire x1="33.528" y1="27.305" x2="33.528" y2="29.718" width="0.8128" layer="16"/>
 <wire x1="35.731" y1="31.921" x2="33.528" y2="29.718" width="0.8128" layer="16"/>
-<wire x1="56.142" y1="38.271" x2="53.34" y2="41.073" width="0.8128" layer="16"/>
+<wire x1="53.602" y1="38.271" x2="50.8" y2="41.073" width="0.8128" layer="16"/>
 </signal>
 <signal name="N$8">
 <contactref element="R2" pad="1"/>
@@ -2139,20 +2138,21 @@ design rules under a new name.</description>
 <wire x1="30.988" y1="27.305" x2="30.988" y2="30.988" width="0.8128" layer="16"/>
 <wire x1="30.988" y1="30.988" x2="35.052" y2="35.052" width="0.8128" layer="16"/>
 <wire x1="35.052" y1="35.052" x2="35.052" y2="35.941" width="0.8128" layer="16"/>
-<wire x1="35.052" y1="35.941" x2="39.312" y2="35.941" width="0.8128" layer="16"/>
-<wire x1="39.312" y1="35.941" x2="41.642" y2="38.271" width="0.8128" layer="16"/>
+<wire x1="35.052" y1="35.941" x2="36.772" y2="35.941" width="0.8128" layer="16"/>
+<wire x1="36.772" y1="35.941" x2="39.102" y2="38.271" width="0.8128" layer="16"/>
 </signal>
 <signal name="N$9">
 <contactref element="R3" pad="1"/>
 <contactref element="SW1" pad="A"/>
 <contactref element="PCB1" pad="D6"/>
-<wire x1="41.642" y1="43.271" x2="32.752" y2="43.271" width="0.8128" layer="16"/>
+<wire x1="39.102" y1="43.271" x2="32.752" y2="43.271" width="0.8128" layer="16"/>
 <wire x1="32.752" y1="43.271" x2="31.242" y2="41.761" width="0.8128" layer="16"/>
 <wire x1="31.242" y1="34.671" x2="31.242" y2="41.761" width="0.8128" layer="16" grouprefs="G1"/>
 <wire x1="28.448" y1="31.877" x2="28.448" y2="27.305" width="0.8128" layer="16" grouprefs="G1"/>
 <wire x1="31.242" y1="34.671" x2="28.448" y2="31.877" width="0.8128" layer="16" grouprefs="G1"/>
-<wire x1="41.402" y1="50.038" x2="41.402" y2="43.511" width="0.8128" layer="16"/>
-<wire x1="41.402" y1="43.511" x2="41.642" y2="43.271" width="0.6096" layer="16"/>
+<wire x1="41.402" y1="50.038" x2="40.132" y2="48.768" width="0.8128" layer="16"/>
+<wire x1="40.132" y1="48.768" x2="40.132" y2="44.301" width="0.8128" layer="16"/>
+<wire x1="40.132" y1="44.301" x2="39.102" y2="43.271" width="0.8128" layer="16"/>
 </signal>
 <signal name="N$10">
 <contactref element="PCB1" pad="A0"/>
